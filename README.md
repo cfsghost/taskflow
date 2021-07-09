@@ -6,6 +6,8 @@ Golang library to build task flow architecture.
 
 ## Benchmark
 
+Here is result of benchmark with testing tools:
+
 ```shell
 $ go test -bench=.
 goos: darwin
