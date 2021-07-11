@@ -17,7 +17,7 @@ type Message struct {
 
 func NewMessage() *Message {
 	return &Message{
-		Logs: make([]*TaskLog, 0),
+		Logs: make([]*TaskLog, 0, 1),
 	}
 }
 
@@ -39,14 +39,19 @@ func (message *Message) Send(outputID int, result interface{}) error {
 
 func (message *Message) Clone() *Message {
 
-	p := NewMessage()
+	curLogSize := len(message.Logs)
+
+	p := &Message{
+		Logs: make([]*TaskLog, curLogSize, curLogSize+1),
+	}
+
 	p.Context = message.Context
 	p.Data = message.Data
 	p.Task = message.Task
 	p.CurrentLog = message.CurrentLog
 
-	for _, taskLog := range message.Logs {
-		p.Logs = append(p.Logs, taskLog)
+	for i, taskLog := range message.Logs {
+		p.Logs[i] = taskLog
 	}
 
 	return p

@@ -15,11 +15,15 @@ func NewConnection(id uint64, source *OutputSlot, dest *InputSlot) *Connection {
 }
 
 func (conn *Connection) Apply() error {
-	return conn.source.AddConnection(conn)
+	conn.dest.AddConnection(conn)
+	conn.source.AddConnection(conn)
+	return nil
 }
 
 func (conn *Connection) Close() error {
-	return conn.source.RemoveConnection(conn)
+	conn.source.RemoveConnection(conn)
+	conn.dest.RemoveConnection(conn)
+	return nil
 }
 
 func (conn *Connection) Execute(message *Message) {

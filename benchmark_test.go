@@ -93,3 +93,60 @@ func BenchmarkTwoTasks(b *testing.B) {
 
 	wg.Wait()
 }
+
+func BenchmarkTenTasks(b *testing.B) {
+
+	var wg sync.WaitGroup
+
+	// Create a taskflow
+	options := NewOptions()
+	tf := NewTaskFlow(options)
+
+	err := tf.Start()
+	if err != nil {
+		b.Error(err)
+	}
+
+	defer tf.Stop()
+	benchTaskFlow = tf
+
+	// Create a task
+	task1 := NewTask(1, 1)
+	task1.SetHandler(func(message *Message) {
+		err := message.Send(0, "TEST")
+		if err != nil {
+			b.Error(err)
+		}
+	})
+	benchTaskFlow.AddTask(task1)
+
+	prevTask := task1
+	for i := 0; i < 10; i++ {
+
+		// Create final task
+		task := NewTask(1, 1)
+		benchTaskFlow.AddTask(task)
+
+		// Link two tasks
+		benchTaskFlow.Link(prevTask, 0, task, 0)
+
+		prevTask = task
+	}
+
+	prevTask.SetHandler(func(message *Message) {
+		wg.Done()
+	})
+
+	wg.Add(b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+
+		// Push data to task flow
+		err := benchTaskFlow.Push(task1.GetID(), 0, "empty")
+		if err != nil {
+			b.Error(err)
+		}
+	}
+
+	wg.Wait()
+}

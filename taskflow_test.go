@@ -1,6 +1,9 @@
 package taskflow
 
-import "testing"
+import (
+	"sync"
+	"testing"
+)
 
 var testTaskFlow *TaskFlow
 
@@ -43,7 +46,7 @@ func TestRemoveTask(t *testing.T) {
 func TestCreateCustomizedTask(t *testing.T) {
 
 	str := "Customized Content"
-	doneCh := make(chan bool)
+	doneCh := make(chan bool, 1)
 
 	// First task
 	task1 := NewTask(1, 1)
@@ -79,16 +82,27 @@ func TestCreateCustomizedTask(t *testing.T) {
 	}
 }
 
-func TestFanOutData(t *testing.T) {
+func TestMultipleSend(t *testing.T) {
 
 	str := "Customized Content"
-	doneCh := make(chan bool)
+	doneCh := make(chan bool, 10)
 
-	// Inherit previous tasks
-	source := testTaskFlow.GetTask(2)
+	// First task
+	task1 := NewTask(1, 1)
+	task1.SetHandler(func(message *Message) {
 
-	task := NewTask(1, 0)
-	task.SetHandler(func(message *Message) {
+		for i := 0; i < 10; i++ {
+			err := message.Send(0, str)
+			if err != nil {
+				t.Error(err)
+			}
+		}
+	})
+	testTaskFlow.AddTask(task1)
+
+	// Second task
+	task2 := NewTask(1, 0)
+	task2.SetHandler(func(message *Message) {
 		if message.Data.(string) != str {
 			doneCh <- false
 			return
@@ -96,18 +110,64 @@ func TestFanOutData(t *testing.T) {
 
 		doneCh <- true
 	})
-	testTaskFlow.AddTask(task)
+	testTaskFlow.AddTask(task2)
 
 	// Link two tasks
-	testTaskFlow.Link(source, 0, task, 0)
+	testTaskFlow.Link(task1, 0, task2, 0)
+
+	// Push data to task flow
+	testTaskFlow.Push(task1.GetID(), 0, "empty")
+
+	counter := 0
+	for success := range doneCh {
+		if !success {
+			t.Fail()
+		}
+
+		counter++
+		if counter == 10 {
+			break
+		}
+	}
+}
+
+func TestFanOutData(t *testing.T) {
+
+	str := "Customized Content"
+	var wg sync.WaitGroup
+
+	// Source
+	source := NewTask(1, 1)
+	source.SetHandler(func(message *Message) {
+		err := message.Send(0, str)
+		if err != nil {
+			t.Error(err)
+		}
+	})
+	testTaskFlow.AddTask(source)
+
+	wg.Add(10)
+	for i := 0; i < 10; i++ {
+		// Linking tasks
+		task := NewTask(1, 0)
+		task.SetHandler(func(message *Message) {
+			if message.Data.(string) != str {
+				t.Fail()
+				return
+			}
+
+			wg.Done()
+		})
+		testTaskFlow.AddTask(task)
+
+		// Link tasks
+		testTaskFlow.Link(source, 0, task, 0)
+	}
 
 	// Push data to task flow
 	testTaskFlow.Push(source.GetID(), 0, "empty")
 
-	success := <-doneCh
-	if !success {
-		t.Fail()
-	}
+	wg.Wait()
 }
 
 func TestUnlink(t *testing.T) {
@@ -118,6 +178,8 @@ func TestUnlink(t *testing.T) {
 		t.Fail()
 	}
 
+	totalConn := len(testTaskFlow.GetConnections())
+
 	// Remove connection from task
 	slots := targetTask.GetOutputSlots()
 	connections := slots[0].GetConnections()
@@ -126,11 +188,33 @@ func TestUnlink(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+
+		totalConn--
 	}
 
 	// Check
-	conns := testTaskFlow.GetConnections()
-	if len(conns) > 0 {
+	if totalConn != len(testTaskFlow.GetConnections()) {
+		t.Fail()
+	}
+}
+func TestPrivateData(t *testing.T) {
+
+	privData := make(chan interface{}, 1)
+
+	task := NewTask(1, 1)
+	task.SetHandler(func(message *Message) {
+		privData <- message.Context.GetPrivData()
+	})
+	testTaskFlow.AddTask(task)
+
+	// Push data to task flow
+	ctx := NewContext()
+	ctx.SetPrivData("private data")
+	testTaskFlow.PushWithContext(task.GetID(), 0, ctx, "test")
+
+	data := <-privData
+
+	if data.(string) != "private data" {
 		t.Fail()
 	}
 }

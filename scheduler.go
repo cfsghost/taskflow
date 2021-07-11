@@ -20,6 +20,10 @@ func (scheduler *Scheduler) initWorker(queue chan *Message) {
 
 	// Wating for messages
 	for message := range queue {
+		if message.CurrentLog.OutputConnection == nil {
+			continue
+		}
+
 		message.CurrentLog.OutputConnection.Execute(message)
 	}
 }

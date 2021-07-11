@@ -52,25 +52,27 @@ func (slot *OutputSlot) Push(message *Message) {
 	message.CurrentLog.Output = slot
 
 	slot.mutex.RLock()
-	isFirstConnection := true
+	//	isFirstConnection := true
 	for _, targetConn := range slot.connections {
 
-		if !isFirstConnection {
-			// Clone a new message which inherited logs
-			m := message.Clone()
-			m.CurrentLog.OutputConnection = targetConn
+		//		if !isFirstConnection {
+		// Clone a new message which inherited logs
+		m := message.Clone()
+		m.CurrentLog.OutputConnection = targetConn
 
-			// Push to slot of next task
-			targetConn.Push(m)
-			continue
-		}
+		// Push to slot of next task
+		targetConn.Push(m)
+		/*
+				continue
+			}
 
-		isFirstConnection = false
+			isFirstConnection = false
 
-		// First slot has original message to push
-		message.CurrentLog.OutputConnection = targetConn
+			// First slot has original message to push
+			message.CurrentLog.OutputConnection = targetConn
 
-		targetConn.Push(message)
+			targetConn.Push(message)
+		*/
 	}
 	slot.mutex.RUnlock()
 

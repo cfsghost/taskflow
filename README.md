@@ -9,16 +9,35 @@ Golang library to build task flow architecture.
 Here is result of benchmark with testing tools:
 
 ```shell
-$ go test -bench=.
+$ go test -bench=. -v
+=== RUN   TestCreateTaskFlow
+--- PASS: TestCreateTaskFlow (0.00s)
+=== RUN   TestCreateEmptyTask
+--- PASS: TestCreateEmptyTask (0.00s)
+=== RUN   TestRemoveTask
+--- PASS: TestRemoveTask (0.00s)
+=== RUN   TestCreateCustomizedTask
+--- PASS: TestCreateCustomizedTask (0.00s)
+=== RUN   TestMultipleSend
+--- PASS: TestMultipleSend (0.00s)
+=== RUN   TestFanOutData
+--- PASS: TestFanOutData (0.00s)
+=== RUN   TestUnlink
+--- PASS: TestUnlink (0.00s)
+=== RUN   TestPrivateData
+    taskflow_test.go:206: private data
+--- PASS: TestPrivateData (0.00s)
 goos: darwin
 goarch: amd64
 pkg: github.com/cfsghost/taskflow
 BenchmarkSingleTask
-BenchmarkSingleTask-16    	 5083108	       213 ns/op
+BenchmarkSingleTask-16    	 5990356	       185 ns/op
 BenchmarkTwoTasks
-BenchmarkTwoTasks-16      	 2585607	       458 ns/op
+BenchmarkTwoTasks-16      	 2381484	       511 ns/op
+BenchmarkTenTasks
+BenchmarkTenTasks-16      	  617601	      2368 ns/op
 PASS
-ok  	github.com/cfsghost/taskflow	3.195s
+ok  	github.com/cfsghost/taskflow	5.000s
 ```
 
 ## License

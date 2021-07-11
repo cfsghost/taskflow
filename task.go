@@ -25,6 +25,7 @@ func NewTask(inputCount int, outputCount int) *Task {
 		inputs:  make([]*InputSlot, inputCount),
 		outputs: make([]*OutputSlot, outputCount),
 		handler: func(message *Message) {
+			// pass through by default
 			message.Send(0, message)
 		},
 	}

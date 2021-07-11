@@ -49,6 +49,31 @@ func (tf *TaskFlow) AddTask(task *Task) uint64 {
 }
 
 func (tf *TaskFlow) RemoveTask(id uint64) {
+
+	task := tf.GetTask(id)
+	if task == nil {
+		return
+	}
+
+	// Unlink all for the task
+	for _, slot := range task.GetInputSlots() {
+
+		connections := slot.GetConnections()
+		for _, conn := range connections {
+			conn.Close()
+			tf.connections.Delete(conn.id)
+		}
+	}
+
+	for _, slot := range task.GetOutputSlots() {
+
+		connections := slot.GetConnections()
+		for _, conn := range connections {
+			conn.Close()
+			tf.connections.Delete(conn.id)
+		}
+	}
+
 	tf.tasks.Delete(id)
 }
 
@@ -80,7 +105,6 @@ func (tf *TaskFlow) PushWithContext(id uint64, inputSlotID int, ctx *Context, da
 	// Prepare payload and push to input slot
 	payload := NewMessage()
 	payload.Context = ctx
-	payload.Context = NewContext()
 	payload.Data = data
 	slot.Push(payload)
 
