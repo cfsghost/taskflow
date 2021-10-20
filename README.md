@@ -25,19 +25,24 @@ $ go test -bench=. -v
 === RUN   TestUnlink
 --- PASS: TestUnlink (0.00s)
 === RUN   TestPrivateData
-    taskflow_test.go:206: private data
 --- PASS: TestPrivateData (0.00s)
 goos: darwin
 goarch: amd64
 pkg: github.com/cfsghost/taskflow
 BenchmarkSingleTask
-BenchmarkSingleTask-16    	 5990356	       185 ns/op
+BenchmarkSingleTask-16                	 6052552	       193 ns/op
 BenchmarkTwoTasks
-BenchmarkTwoTasks-16      	 2381484	       511 ns/op
-BenchmarkTenTasks
-BenchmarkTenTasks-16      	  617601	      2368 ns/op
+BenchmarkTwoTasks-16                  	 2380485	       525 ns/op
+BenchmarkTenTasks_4_Workers
+BenchmarkTenTasks_4_Workers-16        	  646082	      2322 ns/op
+BenchmarkTenTasks_8_Workers
+BenchmarkTenTasks_8_Workers-16        	  679878	      1885 ns/op
+BenchmarkHundredTasks_4_Workers
+BenchmarkHundredTasks_4_Workers-16    	   36993	     35597 ns/op
+BenchmarkHundredTasks_8_Workers
+BenchmarkHundredTasks_8_Workers-16    	   48466	     27605 ns/op
 PASS
-ok  	github.com/cfsghost/taskflow	5.000s
+ok  	github.com/cfsghost/taskflow	11.858s
 ```
 
 ## License
