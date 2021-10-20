@@ -19,12 +19,13 @@ func NewInputSlot(id int, task *Task) *InputSlot {
 
 func (slot *InputSlot) GetConnections() []*Connection {
 
-	slot.mutex.Lock()
-	connections := make([]*Connection, 0, len(slot.connections))
+	slot.mutex.RLock()
+	connections := make([]*Connection, len(slot.connections))
+	i := 0
 	for _, conn := range slot.connections {
-		connections = append(connections, conn)
+		connections[i] = conn
 	}
-	slot.mutex.Unlock()
+	slot.mutex.RUnlock()
 
 	return connections
 }
