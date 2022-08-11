@@ -103,7 +103,7 @@ func (tf *TaskFlow) PushWithContext(id uint64, inputSlotID int, ctx *Context, da
 	}
 
 	// Prepare payload and push to input slot
-	payload := NewMessage()
+	payload := NewMessage(1)
 	payload.Context = ctx
 	payload.Data = data
 	slot.Push(payload)

@@ -26,6 +26,7 @@ func BenchmarkSingleTask(b *testing.B) {
 	// Create a task
 	task1 := NewTask(1, 0)
 	task1.SetHandler(func(message *Message) {
+		message.Release()
 		wg.Done()
 	})
 	benchTaskFlow.AddTask(task1)
@@ -67,12 +68,14 @@ func BenchmarkTwoTasks(b *testing.B) {
 		if err != nil {
 			b.Error(err)
 		}
+		message.Release()
 	})
 	benchTaskFlow.AddTask(task1)
 
 	// Create final task
 	task2 := NewTask(1, 0)
 	task2.SetHandler(func(message *Message) {
+		message.Release()
 		wg.Done()
 	})
 	benchTaskFlow.AddTask(task2)
@@ -118,6 +121,7 @@ func BenchmarkTenTasks_4_Workers(b *testing.B) {
 		if err != nil {
 			b.Error(err)
 		}
+		message.Release()
 	})
 	benchTaskFlow.AddTask(task1)
 
@@ -135,6 +139,7 @@ func BenchmarkTenTasks_4_Workers(b *testing.B) {
 	}
 
 	prevTask.SetHandler(func(message *Message) {
+		message.Release()
 		wg.Done()
 	})
 
@@ -176,6 +181,7 @@ func BenchmarkTenTasks_8_Workers(b *testing.B) {
 		if err != nil {
 			b.Error(err)
 		}
+		message.Release()
 	})
 	benchTaskFlow.AddTask(task1)
 
@@ -193,6 +199,7 @@ func BenchmarkTenTasks_8_Workers(b *testing.B) {
 	}
 
 	prevTask.SetHandler(func(message *Message) {
+		message.Release()
 		wg.Done()
 	})
 
@@ -234,6 +241,7 @@ func BenchmarkHundredTasks_4_Workers(b *testing.B) {
 		if err != nil {
 			b.Error(err)
 		}
+		message.Release()
 	})
 	benchTaskFlow.AddTask(task1)
 
@@ -251,6 +259,7 @@ func BenchmarkHundredTasks_4_Workers(b *testing.B) {
 	}
 
 	prevTask.SetHandler(func(message *Message) {
+		message.Release()
 		wg.Done()
 	})
 
@@ -292,6 +301,7 @@ func BenchmarkHundredTasks_8_Workers(b *testing.B) {
 		if err != nil {
 			b.Error(err)
 		}
+		message.Release()
 	})
 	benchTaskFlow.AddTask(task1)
 
@@ -309,6 +319,7 @@ func BenchmarkHundredTasks_8_Workers(b *testing.B) {
 	}
 
 	prevTask.SetHandler(func(message *Message) {
+		message.Release()
 		wg.Done()
 	})
 
