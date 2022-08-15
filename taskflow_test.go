@@ -84,15 +84,15 @@ func TestCreateCustomizedTask(t *testing.T) {
 
 func TestMultipleSend(t *testing.T) {
 
-	str := "Customized Content"
-	doneCh := make(chan bool, 10)
+	targetTimes := 100
+	doneCh := make(chan bool, targetTimes)
 
 	// First task
 	task1 := NewTask(1, 1)
 	task1.SetHandler(func(message *Message) {
 
-		for i := 0; i < 10; i++ {
-			err := message.Send(0, str)
+		for i := 0; i < targetTimes; i++ {
+			err := message.Send(0, i+1)
 			if err != nil {
 				t.Error(err)
 			}
@@ -102,8 +102,11 @@ func TestMultipleSend(t *testing.T) {
 
 	// Second task
 	task2 := NewTask(1, 0)
+	msgCount := 0
 	task2.SetHandler(func(message *Message) {
-		if message.Data.(string) != str {
+		msgCount++
+
+		if message.Data.(int) != msgCount {
 			doneCh <- false
 			return
 		}
@@ -125,7 +128,7 @@ func TestMultipleSend(t *testing.T) {
 		}
 
 		counter++
-		if counter == 10 {
+		if counter == targetTimes {
 			break
 		}
 	}
