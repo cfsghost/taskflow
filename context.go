@@ -2,13 +2,19 @@ package taskflow
 
 import "sync"
 
+var ctxPool = sync.Pool{
+	New: func() interface{} {
+		return &Context{}
+	},
+}
+
 type Context struct {
 	meta     sync.Map
 	privData interface{}
 }
 
 func NewContext() *Context {
-	return &Context{}
+	return ctxPool.Get().(*Context)
 }
 
 func (ctx *Context) SetPrivData(privData interface{}) {
@@ -32,6 +38,7 @@ func (ctx *Context) GetMeta(key interface{}) (interface{}, bool) {
 }
 
 func (ctx *Context) Reset() {
+	ctx.privData = nil
 	ctx.meta.Range(func(key interface{}, value interface{}) bool {
 		ctx.meta.Delete(key)
 		return true
