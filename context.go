@@ -45,3 +45,7 @@ func (ctx *Context) Reset() {
 	})
 
 }
+
+func (ctx *Context) Release() {
+	ctxPool.Put(ctx)
+}
